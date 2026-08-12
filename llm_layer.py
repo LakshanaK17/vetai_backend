@@ -14,6 +14,11 @@ SYSTEM = ("You are a veterinary decision-support assistant. Obey the retrieved B
           "systemic agent is given orally or by injection. Always state that a licensed veterinarian "
           "must confirm dosage, contraindications and severity before use. Be concise and clinical.")
 
+def ensure_loaded(model_name: str = "Qwen/Qwen2.5-1.5B-Instruct"):
+    """Load the model on first use (lazy). Safe to call repeatedly."""
+    if _llm is None:
+        load(model_name)
+
 def load(model_name: str = "Qwen/Qwen2.5-1.5B-Instruct"):
     """Load the model once at startup."""
     global _tok, _llm, _is_seq2seq, _device

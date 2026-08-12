@@ -9,6 +9,9 @@ Config via environment variables (see .env.example / README.md).
 import io
 import os
 import uuid
+os.environ.setdefault("TF_ENABLE_ONEDNN_OPTS", "0")
+os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
+os.environ.setdefault("OMP_NUM_THREADS", "1")
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -86,10 +89,9 @@ app.add_middleware(
 @app.on_event("startup")
 def _startup():
     _load_models()
-    if USE_LLM:
-        import llm_layer
-        llm_layer.load(LLM_MODEL)
-    print(f"[main] ready. USE_LLM={USE_LLM}")
+    # LLM loads lazily on first /diagnose (see _build_response) so the container
+    # boots fast and passes Railway's health check even on small instances.
+    print(f"[main] ready. USE_LLM={USE_LLM} (LLM loads lazily on first use)")
 
 @app.get("/health")
 def health():
@@ -109,6 +111,7 @@ def _build_response(breed_label, breed_conf, lesion_label, lesion_conf):
     if USE_LLM and rec["category"] != "healthy":
         try:
             import llm_layer
+            llm_layer.ensure_loaded(LLM_MODEL)   # lazy load on first use
             ai_text = llm_layer.generate(rec)
         except Exception as e:  # never fail the request because of the LLM
             ai_text = None
