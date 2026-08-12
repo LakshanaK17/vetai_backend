@@ -1,0 +1,19 @@
+# Core API
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+pillow>=10.0
+numpy>=1.26
+
+# Vision models (breed + lesion). Match the TF version you trained with.
+tensorflow==2.17.0
+
+# Database (Supabase / Postgres)
+supabase>=2.6
+
+# LLM decision layer (USE_LLM=1). CPU build of torch works on Railway but is slow;
+# for speed use a GPU host or switch LLM_MODEL to google/flan-t5-large.
+torch>=2.2
+transformers>=4.40
+accelerate>=0.30
+sentencepiece>=0.2
